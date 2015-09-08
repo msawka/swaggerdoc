@@ -2,6 +2,8 @@
 
 The SwaggerDoc module provides a convenience task for generating [Swagger](http://swagger.io/) API documentation for Phoenix and Ecto-based projects.  This task has been created for Phoenix and Ecto 1.0 and greater.
 
+[![Build Status](https://semaphoreci.com/api/v1/projects/4b7a4024-763d-4585-9e9a-d5a02545bacf/534603/badge.svg)](https://semaphoreci.com/perceptive/swaggerdoc)
+
 ## Getting Started
 
 To use swaggerdoc with your projects, edit your mix.exs file and add it as a dependency:
