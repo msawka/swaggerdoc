@@ -1,0 +1,9 @@
+/_build
+/deps
+erl_crash.dump
+*.ez
+.DS_Store
+swagger/
+/examples/hello_user/_build
+/examples/hello_user/deps
+/examples/hello_user/node_modules

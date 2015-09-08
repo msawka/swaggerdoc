@@ -1,2 +1,11 @@
-# swaggerdoc
-Contains an Mix tasks for generating Swagger documentation for Phoenix and Ecto projects.
+SwaggerDoc
+==========
+
+** TODO: Add description **
+
+Config
+
+```iex
+config :swaggerdoc,
+  swagger_version: "2.0",
+```
