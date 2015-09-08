@@ -24,11 +24,13 @@
 
   <h1 id="full_list_header">
     
-      swaggerdoc v0.0.1
+      <a href="https://github.com/OpenAperture/swaggerdoc">swaggerdoc v0.0.1</a>
     
   </h1>
 
   <h2 id="sub_list_header">
+    
+      <a href="README.html">README</a>
     
     <a href="overview.html">Overview</a>
   </h2>
@@ -96,11 +98,35 @@
 
       
         <section id="moduledoc" class="docstring">
-          <p>Generates Swagger JSON</p>
+          <p>To use swaggerdoc with your projects, edit your mix.exs file and add it as a dependency:</p>
+<pre><code class="elixir">defp deps do
+  [{:swaggerdoc, &quot;~&gt; 0.0.1&quot;}]
+end</code></pre>
+<p>To execute the Mix task, simply type <code class="inline">mix swagger</code>:</p>
+<pre><code class="elixir">hello_user$ mix swagger
+Generating Swagger documentation...
+Adding Ecto definitions...
+Adding Phoenix Routes...
+Writing JSON to file...
+Finished generating Swagger documentation!</code></pre>
+<p>To view the generated Swagger in <a href="https://github.com/swagger-api/swagger-ui">swagger-ui</a>:</p>
+<ul>
+<li>In a temp folder, execute a git clone of <a href="https://github.com/swagger-api/swagger-ui.git">https://github.com/swagger-api/swagger-ui.git</a>
+</li>
+<li>In the browser of your choice, open the file <em>temp folder</em>/swagger-ui/dist/index.html
+</li>
+<li>In the JSON API input box at the top of the page, paste in the link to the JSON
+</li>
+<li>Hit the ‘Explore’ button
+</li>
+</ul>
+<p>For a complete example, please see the <a href="https://github.com/OpenAperture/swaggerdoc/tree/master/examples">examples</a> section.</p>
 
         </section>
       
 
+      
+        <a href="https://github.com/OpenAperture/swaggerdoc/blob/master/lib/mix/tasks/swagger.ex#L1" class="view_source">Source</a>
       
 
       
@@ -109,27 +135,45 @@
           <table class="summary">
             <tr>
   <td class="summary_signature"><a href="#add_routes/2">add_routes(arg1, swagger)</a></td>
-  <td class="summary_synopsis"></td>
+  <td class="summary_synopsis"><p>Method to add Phoenix routes to the Swagger map</p>
+</td>
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#app_json/0">app_json()</a></td>
+  <td class="summary_synopsis"><p>Contains the application-specific JSON that forms the base of the Swagger JSON</p>
+</td>
 </tr>
 <tr>
   <td class="summary_signature"><a href="#build_definitions/2">build_definitions(list1, def_json)</a></td>
-  <td class="summary_synopsis"></td>
+  <td class="summary_synopsis"><p>Method to build the Swagger definitions from Ecto models</p>
+</td>
 </tr>
 <tr>
-  <td class="summary_signature"><a href="#default_json/0">default_json()</a></td>
-  <td class="summary_synopsis"></td>
+  <td class="summary_signature"><a href="#convert_property_type/1">convert_property_type(type)</a></td>
+  <td class="summary_synopsis"><p>Method to convert an Ecto schema type (<a href="https://github.com/elixir-lang/ecto/blob/v1.0.0/lib/ecto/schema.ex#L107-L145">https://github.com/elixir-lang/ecto/blob/v1.0.0/lib/ecto/schema.ex#L107-L145</a>)
+into a Swagger property type (<a href="http://swagger.io/specification/#dataTypeType">http://swagger.io/specification/#dataTypeType</a>)</p>
+</td>
 </tr>
 <tr>
   <td class="summary_signature"><a href="#default_responses/2">default_responses(verb_string, response_schema \\ nil)</a></td>
-  <td class="summary_synopsis"></td>
+  <td class="summary_synopsis"><p>Method to build the default Swagger response map for a specific verb, if not specified by the developer</p>
+</td>
 </tr>
 <tr>
-  <td class="summary_signature"><a href="#default_verb/1">default_verb(path)</a></td>
-  <td class="summary_synopsis"></td>
+  <td class="summary_signature"><a href="#get_router/1">get_router(args)</a></td>
+  <td class="summary_synopsis"><p>Method to return the Phoenix router, based on args or configuration</p>
+</td>
+</tr>
+<tr>
+  <td class="summary_signature"><a href="#parse_default_verb/1">parse_default_verb(path)</a></td>
+  <td class="summary_synopsis"><p>Method to build the default Swagger verb map, if not specified by the developer</p>
+</td>
 </tr>
 <tr>
   <td class="summary_signature"><a href="#path_from_route/2">path_from_route(list1, swagger_path)</a></td>
-  <td class="summary_synopsis"></td>
+  <td class="summary_synopsis"><p>Method to add a specific path from the Phoenix routes to the Swagger map.  Paths must enclose params with braces {var}, 
+rather than :var (<a href="http://swagger.io/specification/#pathTemplating">http://swagger.io/specification/#pathTemplating</a>)</p>
+</td>
 </tr>
 <tr>
   <td class="summary_signature"><a href="#run/1">run(args)</a></td>
@@ -156,9 +200,44 @@
     </div>
   </div>
   
+    <p>Specs:</p>
+    <ul class="spec">
+      
+        <li>add_routes(list, %{}) :: %{}</li>
+      
+    </ul>
+  
   <section class="docstring">
-    
+    <p>Method to add Phoenix routes to the Swagger map</p>
+
   </section>
+  
+    <a href="https://github.com/OpenAperture/swaggerdoc/blob/master/lib/mix/tasks/swagger.ex#L116" class="view_source">Source</a>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="app_json/0">
+    <span class="signature"><strong>app_json()</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#app_json/0" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+    <p>Specs:</p>
+    <ul class="spec">
+      
+        <li>app_json :: %{}</li>
+      
+    </ul>
+  
+  <section class="docstring">
+    <p>Contains the application-specific JSON that forms the base of the Swagger JSON</p>
+
+  </section>
+  
+    <a href="https://github.com/OpenAperture/swaggerdoc/blob/master/lib/mix/tasks/swagger.ex#L74" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -171,24 +250,45 @@
     </div>
   </div>
   
+    <p>Specs:</p>
+    <ul class="spec">
+      
+        <li>build_definitions(list, %{}) :: %{}</li>
+      
+    </ul>
+  
   <section class="docstring">
-    
+    <p>Method to build the Swagger definitions from Ecto models</p>
+
   </section>
+  
+    <a href="https://github.com/OpenAperture/swaggerdoc/blob/master/lib/mix/tasks/swagger.ex#L234" class="view_source">Source</a>
   
 </section>
 <section class="detail">
-  <div class="detail_header" id="default_json/0">
-    <span class="signature"><strong>default_json()</strong></span>
+  <div class="detail_header" id="convert_property_type/1">
+    <span class="signature"><strong>convert_property_type(type)</strong></span>
     <div class="detail_header_links">
       <span class="detail_type">(function)</span>
-      <a href="#default_json/0" class="detail_link" title="Link to this function">#</a>
+      <a href="#convert_property_type/1" class="detail_link" title="Link to this function">#</a>
       <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
     </div>
   </div>
   
+    <p>Specs:</p>
+    <ul class="spec">
+      
+        <li>convert_property_type(term) :: %{}</li>
+      
+    </ul>
+  
   <section class="docstring">
-    
+    <p>Method to convert an Ecto schema type (<a href="https://github.com/elixir-lang/ecto/blob/v1.0.0/lib/ecto/schema.ex#L107-L145">https://github.com/elixir-lang/ecto/blob/v1.0.0/lib/ecto/schema.ex#L107-L145</a>)
+into a Swagger property type (<a href="http://swagger.io/specification/#dataTypeType">http://swagger.io/specification/#dataTypeType</a>)</p>
+
   </section>
+  
+    <a href="https://github.com/OpenAperture/swaggerdoc/blob/master/lib/mix/tasks/swagger.ex#L254" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -201,24 +301,69 @@
     </div>
   </div>
   
+    <p>Specs:</p>
+    <ul class="spec">
+      
+        <li>default_responses(<a href="http://elixir-lang.org/docs/stable/elixir/String.html#t:t/0">String.t</a>, any) :: %{}</li>
+      
+    </ul>
+  
   <section class="docstring">
-    
+    <p>Method to build the default Swagger response map for a specific verb, if not specified by the developer</p>
+
   </section>
+  
+    <a href="https://github.com/OpenAperture/swaggerdoc/blob/master/lib/mix/tasks/swagger.ex#L210" class="view_source">Source</a>
   
 </section>
 <section class="detail">
-  <div class="detail_header" id="default_verb/1">
-    <span class="signature"><strong>default_verb(path)</strong></span>
+  <div class="detail_header" id="get_router/1">
+    <span class="signature"><strong>get_router(args)</strong></span>
     <div class="detail_header_links">
       <span class="detail_type">(function)</span>
-      <a href="#default_verb/1" class="detail_link" title="Link to this function">#</a>
+      <a href="#get_router/1" class="detail_link" title="Link to this function">#</a>
       <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
     </div>
   </div>
   
+    <p>Specs:</p>
+    <ul class="spec">
+      
+        <li>get_router([any]) :: term</li>
+      
+    </ul>
+  
   <section class="docstring">
-    
+    <p>Method to return the Phoenix router, based on args or configuration</p>
+
   </section>
+  
+    <a href="https://github.com/OpenAperture/swaggerdoc/blob/master/lib/mix/tasks/swagger.ex#L104" class="view_source">Source</a>
+  
+</section>
+<section class="detail">
+  <div class="detail_header" id="parse_default_verb/1">
+    <span class="signature"><strong>parse_default_verb(path)</strong></span>
+    <div class="detail_header_links">
+      <span class="detail_type">(function)</span>
+      <a href="#parse_default_verb/1" class="detail_link" title="Link to this function">#</a>
+      <a class="to_top_link" href="#content" title="To the top of the page">&uarr;</a>
+    </div>
+  </div>
+  
+    <p>Specs:</p>
+    <ul class="spec">
+      
+        <li>parse_default_verb(<a href="http://elixir-lang.org/docs/stable/elixir/String.html#t:t/0">String.t</a>) :: %{}</li>
+      
+    </ul>
+  
+  <section class="docstring">
+    <p>Method to build the default Swagger verb map, if not specified by the developer</p>
+
+  </section>
+  
+    <a href="https://github.com/OpenAperture/swaggerdoc/blob/master/lib/mix/tasks/swagger.ex#L177" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -231,9 +376,20 @@
     </div>
   </div>
   
+    <p>Specs:</p>
+    <ul class="spec">
+      
+        <li>path_from_route(list, %{}) :: %{}</li>
+      
+    </ul>
+  
   <section class="docstring">
-    
+    <p>Method to add a specific path from the Phoenix routes to the Swagger map.  Paths must enclose params with braces {var}, 
+rather than :var (<a href="http://swagger.io/specification/#pathTemplating">http://swagger.io/specification/#pathTemplating</a>)</p>
+
   </section>
+  
+    <a href="https://github.com/OpenAperture/swaggerdoc/blob/master/lib/mix/tasks/swagger.ex#L163" class="view_source">Source</a>
   
 </section>
 <section class="detail">
@@ -257,6 +413,8 @@
     <p>Mix entrypoint method</p>
 
   </section>
+  
+    <a href="https://github.com/OpenAperture/swaggerdoc/blob/master/lib/mix/tasks/swagger.ex#L40" class="view_source">Source</a>
   
 </section>
 

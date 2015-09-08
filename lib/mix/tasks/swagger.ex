@@ -4,7 +4,33 @@ defmodule Mix.Tasks.Swagger do
   @shortdoc "Generates Swagger JSON from Phoenix routes and Ecto models"
 
   @moduledoc """  
-  Generates Swagger JSON
+  To use swaggerdoc with your projects, edit your mix.exs file and add it as a dependency:
+
+  ```elixir
+  defp deps do
+    [{:swaggerdoc, "~> 0.0.1"}]
+  end
+  ```
+
+  To execute the Mix task, simply type `mix swagger`:
+
+  ```elixir
+  hello_user$ mix swagger
+  Generating Swagger documentation...
+  Adding Ecto definitions...
+  Adding Phoenix Routes...
+  Writing JSON to file...
+  Finished generating Swagger documentation!
+  ```
+
+  To view the generated Swagger in [swagger-ui](https://github.com/swagger-api/swagger-ui):
+
+  * In a temp folder, execute a git clone of https://github.com/swagger-api/swagger-ui.git
+  * In the browser of your choice, open the file *temp folder*/swagger-ui/dist/index.html
+  * In the JSON API input box at the top of the page, paste in the link to the JSON
+  * Hit the 'Explore' button
+
+  For a complete example, please see the [examples](https://github.com/OpenAperture/swaggerdoc/tree/master/examples) section.
   """  
 
   @doc """
