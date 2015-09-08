@@ -303,3 +303,6 @@ The default behavior of the task may be improved by adding action-specific funct
 ```
   * Note that `body` parameters are required to define a `schema`.
 
+## Contributing
+
+To contribute to OpenAperture development, view our [contributing guide](http://openaperture.io/dev_resources/contributing.html)
