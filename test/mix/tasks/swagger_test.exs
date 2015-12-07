@@ -19,6 +19,28 @@ defmodule Mocks.UserModel do
   end  
 end
 
+defmodule Mocks.UserRequiredModel do
+  use Ecto.Model
+
+  schema "users" do
+    field :name, :string
+    field :email, :string
+    field :bio, :string
+    field :number_of_pets, :integer
+
+    timestamps
+  end  
+
+  @required_fields ~w(name email)
+  @optional_fields ~w(bio number_of_pets)
+
+  def changeset(model, params \\ :empty) do
+    model
+    |> cast(params, @required_fields, @optional_fields)
+  end
+
+end
+
 defmodule Mocks.SimpleRouter do
   def __routes__, do: []
 end
@@ -46,6 +68,7 @@ defmodule Mix.Tasks.Swagger.Tests do
     Application.delete_env(:swaggerdoc, :schemes)
     Application.delete_env(:swaggerdoc, :consumes)
     Application.delete_env(:swaggerdoc, :produces)    
+    Application.delete_env(:swaggerdoc, :pipe_through)
   end
 
   setup do
@@ -189,6 +212,35 @@ defmodule Mix.Tasks.Swagger.Tests do
       }}
   end 
 
+  test "add_routes - route with select pipe_through" do
+    Application.put_env(:swaggerdoc, :pipe_through, [:api])
+    route = [%PhoenixRoute{
+      path: "/testing/:id",
+      opts: :index,
+      verb: "GET"
+    },%PhoenixRoute{
+      path: "/api/v1/testing/:id",
+      opts: :index,
+      verb: "GET",
+      pipe_through: [:api],
+    }]
+    assert Swagger.add_routes(route, %{paths: %{}}) == %{
+      paths: %{"/api/v1/testing/{id}" => 
+        %{"get" =>  %{
+          description: "", 
+          operationId: "index", 
+          parameters: [%{"description" => "", "in" => "path", "name" => "id", "required" => true, "type" => "integer"}],
+          produces: [],
+          responses: %{
+            "200" => %{"description" => "Resource Content"},
+            "401" => %{"description" => "Request is not authorized"}, "404" => %{"description" => "Resource not found"},
+            "500" => %{"description" => "Internal Server Error"}
+          }
+        }}
+      }}
+    Application.delete_env(:swaggerdoc, :pipe_through)
+  end 
+
   test "add_routes - route from custom plug" do
     route = %PhoenixRoute{
       path: "/test",
@@ -319,6 +371,22 @@ defmodule Mix.Tasks.Swagger.Tests do
           "updated_at" => %{"format" => "date-time", "type" => "string"}}
         }
     }
+  end 
+
+  test "build_definitions - model support changeset (required_fields)" do
+    assert Swagger.build_definitions([{Mocks.UserRequiredModel, ""}], %{}) == %{
+      "Mocks.UserRequiredModel" => %{
+        #"required" => ["email", "name"],
+        "properties" => %{
+          "bio" => %{"type" => "string"}, 
+          "email" => %{"type" => "string"},
+          "id" => %{"format" => "int64", "type" => "integer"},
+          "inserted_at" => %{"format" => "date-time", "type" => "string"}, 
+          "name" => %{"type" => "string"},
+          "number_of_pets" => %{"format" => "int64", "type" => "integer"},
+          "updated_at" => %{"format" => "date-time", "type" => "string"}}
+        }
+    }
   end    
 
   #==============================
@@ -384,7 +452,7 @@ defmodule Mix.Tasks.Swagger.Tests do
   test "run raise exception" do
     :meck.new(Swagger, [:passthrough])
     :meck.expect(Swagger, :get_router, fn _ -> Mocks.SimpleRouter end)
-    :meck.expect(Swagger, :add_routes, fn _,_ -> raise "bad news bears" end)
+    #:meck.expect(Swagger, :add_routes, fn _,_ -> raise "bad news bears" end)
 
     assert Swagger.run(nil) == :ok
   after

@@ -117,43 +117,48 @@ defmodule Mix.Tasks.Swagger do
   def add_routes(nil, swagger), do: swagger
   def add_routes([], swagger), do: swagger
   def add_routes([route | remaining_routes], swagger) do
-    swagger_path = path_from_route(String.split(route.path, "/"), nil)
-
-    path = swagger[:paths][swagger_path]
-    if path == nil do
-      path = %{}
-    end
-
-    func_name = "swaggerdoc_#{route.opts}"
-    verb = if route.plug != nil && Keyword.has_key?(route.plug.__info__(:functions), String.to_atom(func_name)) do
-      apply(route.plug, String.to_atom(func_name), [])
+    pipe_through = Application.get_env(:swaggerdoc, :pipe_through, nil)
+    if pipe_through && route.pipe_through != pipe_through do
+      add_routes(remaining_routes, swagger)
     else
-      parse_default_verb(route.path)
+      swagger_path = path_from_route(String.split(route.path, "/"), nil)
+
+      path = swagger[:paths][swagger_path]
+      if path == nil do
+        path = %{}
+      end
+
+      func_name = "swaggerdoc_#{route.opts}"
+      verb = if route.plug != nil && Keyword.has_key?(route.plug.__info__(:functions), String.to_atom(func_name)) do
+        apply(route.plug, String.to_atom(func_name), [])
+      else
+        parse_default_verb(route.path)
+      end
+
+      response_schema = verb[:response_schema]
+      verb = Map.delete(verb, :response_schema)
+
+      verb_string = String.downcase("#{route.verb}")
+      if verb[:responses] == nil do
+        verb = Map.put(verb, :responses, default_responses(verb_string, response_schema))
+      end
+
+      if verb[:produces] == nil do
+        verb = Map.put(verb, :produces, Application.get_env(:swaggerdoc, :produces, []))
+      end
+
+      if verb[:operationId] == nil do
+        verb = Map.put(verb, :operationId, "#{route.opts}")
+      end
+
+      if verb[:description] == nil do
+        verb = Map.put(verb, :description, "")
+      end
+
+      path = Map.put(path, verb_string, verb)
+      paths = Map.put(swagger[:paths], swagger_path, path)
+      add_routes(remaining_routes, Map.put(swagger, :paths, paths))
     end
-
-    response_schema = verb[:response_schema]
-    verb = Map.delete(verb, :response_schema)
-
-    verb_string = String.downcase("#{route.verb}")
-    if verb[:responses] == nil do
-      verb = Map.put(verb, :responses, default_responses(verb_string, response_schema))
-    end
-
-    if verb[:produces] == nil do
-      verb = Map.put(verb, :produces, Application.get_env(:swaggerdoc, :produces, []))
-    end
-
-    if verb[:operationId] == nil do
-      verb = Map.put(verb, :operationId, "#{route.opts}")
-    end
-
-    if verb[:description] == nil do
-      verb = Map.put(verb, :description, "")
-    end
-
-    path = Map.put(path, verb_string, verb)
-    paths = Map.put(swagger[:paths], swagger_path, path)
-    add_routes(remaining_routes, Map.put(swagger, :paths, paths))
   end
 
   @doc """
