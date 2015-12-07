@@ -349,15 +349,15 @@ defmodule Mix.Tasks.Swagger.Tests do
   end      
 
   test "convert_property_type - :Ecto.DateTime " do
-    assert Swagger.convert_property_type(:Ecto.DateTime ) == %{"type" => "string", "format" => "date-time"}
+    assert Swagger.convert_property_type(Ecto.DateTime ) == %{"type" => "string", "format" => "date-time"}
   end      
 
   test "convert_property_type - :Ecto.Date" do
-    assert Swagger.convert_property_type(:Ecto.Date) ==%{"type" => "string", "format" => "date"}
+    assert Swagger.convert_property_type(Ecto.Date) ==%{"type" => "string", "format" => "date"}
   end    
 
   test "convert_property_type - :Ecto.Time" do
-    assert Swagger.convert_property_type(:Ecto.Time) == %{"type" => "string", "format" => "date-time"}
+    assert Swagger.convert_property_type(Ecto.Time) == %{"type" => "string", "format" => "date-time"}
   end   
 
   test "convert_property_type - :uuid" do
