@@ -356,7 +356,18 @@ defmodule Mix.Tasks.Swagger.Tests do
 
   test "build_definitions - modules but no models" do
     assert Swagger.build_definitions([{Mocks.DefaultPlug, ""}], %{}) == %{}
-  end    
+  end 
+
+  #==============================
+  # required_fields tests
+
+  test "required_fields - parse errors from struct, if errors is empty" do
+    assert Swagger.required_fields([]) == []
+  end
+
+  test "required_fields - parse errors from struct" do
+    assert Swagger.required_fields([name: "can't be blank", email: "can't be blank"]) == ["name", "email"]
+  end
 
   test "build_definitions - model" do
     assert Swagger.build_definitions([{Mocks.UserModel, ""}], %{}) == %{
@@ -376,7 +387,6 @@ defmodule Mix.Tasks.Swagger.Tests do
   test "build_definitions - model support changeset (required_fields)" do
     assert Swagger.build_definitions([{Mocks.UserRequiredModel, ""}], %{}) == %{
       "Mocks.UserRequiredModel" => %{
-        #"required" => ["email", "name"],
         "properties" => %{
           "bio" => %{"type" => "string"}, 
           "email" => %{"type" => "string"},
@@ -384,8 +394,10 @@ defmodule Mix.Tasks.Swagger.Tests do
           "inserted_at" => %{"format" => "date-time", "type" => "string"}, 
           "name" => %{"type" => "string"},
           "number_of_pets" => %{"format" => "int64", "type" => "integer"},
-          "updated_at" => %{"format" => "date-time", "type" => "string"}}
-        }
+          "updated_at" => %{"format" => "date-time", "type" => "string"}
+        },
+        "required" => ["name", "email"]
+      }
     }
   end    
 
@@ -452,7 +464,7 @@ defmodule Mix.Tasks.Swagger.Tests do
   test "run raise exception" do
     :meck.new(Swagger, [:passthrough])
     :meck.expect(Swagger, :get_router, fn _ -> Mocks.SimpleRouter end)
-    #:meck.expect(Swagger, :add_routes, fn _,_ -> raise "bad news bears" end)
+    :meck.expect(Swagger, :add_routes, fn _,_ -> raise "bad news bears" end)
 
     assert Swagger.run(nil) == :ok
   after

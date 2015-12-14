@@ -246,6 +246,13 @@ defmodule Mix.Tasks.Swagger do
       end
 
       module_json = %{"properties" => properties_json}
+
+      if :erlang.function_exported(module, :changeset, 2) do
+        module_struct = module.changeset(module.__struct__, %{})
+        required = required_fields module_struct.errors
+        module_json = Map.put(module_json, "required", required)
+      end
+
       def_json = Map.put(def_json, "#{inspect module}", module_json)
     end
 
@@ -273,4 +280,12 @@ defmodule Mix.Tasks.Swagger do
       _ -> %{"type" => "string"}
     end
   end
+
+  def required_fields([]), do: []
+
+  def required_fields([head|tail]) do
+    {key, _msg} = head
+    [to_string(key)|required_fields(tail)]
+  end
+
 end
