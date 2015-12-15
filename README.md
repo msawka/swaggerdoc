@@ -54,6 +54,11 @@ The following task-specific options are available:
   * Description:  Specifies the file name (within the output_path) of the Swagger JSON
   * Type:  string
   * Default Value:  "api.json"
+* :pipe_through,
+  * Description:  if pipe_through is defined only this is used.
+  * Type: list
+  * Default Value: nil
+  * Example: pipe_through: [:api]
 
 ### Swagger Config
 The following Swagger-specific options are available:
@@ -223,6 +228,27 @@ The JSON output will look like:
 	  }
 	}
 ```
+
+If changeset is defined in models, like this:
+```elixir
+  schema "users" do
+    field :name, :string
+    field :email, :string
+    field :bio, :string
+    field :number_of_pets, :integer
+
+    timestamps
+  end
+
+  @required_fields ~w(name email)
+  @optional_fields ~w(bio number_of_pets)
+
+  def changeset(model, params \\ :empty) do
+    model
+      |> cast(params, @required_fields, @optional_fields)
+  end
+```
+Changeset is used for 'required' fields in schema.
 
 ### Converting Phoenix Routes into Swagger Paths
 The [Phoenix Routes](https://github.com/phoenixframework/phoenix/blob/v1.0.0/lib/phoenix/router/route.ex) that is found via the [Phoenix Router](https://github.com/phoenixframework/phoenix/blob/v1.0.0/lib/phoenix/router.ex) are converted into a [Swagger Paths Object](http://swagger.io/specification/#pathsObject), each route becoming a [Path Item](http://swagger.io/specification/#pathItemObject).  The Phoenix template paths are converted into [Swagger path templates](http://swagger.io/specification/#pathTemplating) and each templated variable is converted into a [Path paramter](http://swagger.io/specification/#parametersDefinitionsObject).  All path parameters are assumed to be required and are of type string (except for parameters named `id`, which are assumed to be integers).
