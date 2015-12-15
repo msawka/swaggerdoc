@@ -3,7 +3,7 @@ defmodule Mix.Tasks.Swagger do
 
   @shortdoc "Generates Swagger JSON from Phoenix routes and Ecto models"
 
-  @moduledoc """  
+  @moduledoc """
   To use swaggerdoc with your projects, edit your mix.exs file and add it as a dependency:
 
   ```elixir
@@ -31,13 +31,20 @@ defmodule Mix.Tasks.Swagger do
   * Hit the 'Explore' button
 
   For a complete example, please see the [examples](https://github.com/OpenAperture/swaggerdoc/tree/master/examples) section.
-  """  
+  """
 
   @doc """
   Mix entrypoint method
   """
   @spec run([any]) :: no_return
   def run(args) do
+    Mix.Task.run "compile", args
+    generate_docs(args)
+  end
+
+  defp generate_docs(args) do
+    Mix.Task.run "compile", args
+
     try do
       Mix.shell.info "Generating Swagger documentation..."
 
@@ -55,13 +62,13 @@ defmodule Mix.Tasks.Swagger do
       File.write!("#{output_path}/#{output_file}", Poison.encode!(swagger_json))
       Mix.shell.info "Finished generating Swagger documentation!"
     catch
-      :exit, code -> 
+      :exit, code ->
         Mix.shell.error "Failed to generate Swagger documentation:  Exited with code #{inspect code}"
         Mix.shell.error Exception.format_stacktrace(System.stacktrace)
-      :throw, value -> 
+      :throw, value ->
         Mix.shell.error "Failed to generate Swagger documentation:  Throw called with #{inspect value}"
         Mix.shell.error Exception.format_stacktrace(System.stacktrace)
-      what, value -> 
+      what, value ->
         Mix.shell.error "Failed to generate Swagger documentation:  Caught #{inspect what} with #{inspect value}"
         Mix.shell.error Exception.format_stacktrace(System.stacktrace)
     end
@@ -107,7 +114,7 @@ defmodule Mix.Tasks.Swagger do
       Mix.Project.umbrella? -> Mix.raise "Umbrella applications require an explicit router to be given to Phoenix.routes"
       true -> Module.concat(Mix.Phoenix.base(), "Router")
     end
-  end  
+  end
 
   @doc """
   Method to add Phoenix routes to the Swagger map
@@ -156,12 +163,12 @@ defmodule Mix.Tasks.Swagger do
   end
 
   @doc """
-  Method to add a specific path from the Phoenix routes to the Swagger map.  Paths must enclose params with braces {var}, 
+  Method to add a specific path from the Phoenix routes to the Swagger map.  Paths must enclose params with braces {var},
   rather than :var (http://swagger.io/specification/#pathTemplating)
   """
   @spec path_from_route(list, map) :: map
   def path_from_route([], swagger_path), do: swagger_path
-  def path_from_route([path_segment | remaining_segments], swagger_path) do 
+  def path_from_route([path_segment | remaining_segments], swagger_path) do
     path_from_route(remaining_segments, cond do
       path_segment == nil || String.length(path_segment) == 0 -> swagger_path
       swagger_path == nil -> "/#{path_segment}"
@@ -196,8 +203,8 @@ defmodule Mix.Tasks.Swagger do
       else
         parameters
       end
-    end   
-   
+    end
+
     %{
        parameters: parameters,
      }
@@ -209,12 +216,12 @@ defmodule Mix.Tasks.Swagger do
   @spec default_responses(String.t, any) :: map
   def default_responses(verb_string, response_schema \\ nil) do
     responses = %{
-      "404" => %{"description" => "Resource not found"}, 
-      "401" => %{"description" => "Request is not authorized"}, 
+      "404" => %{"description" => "Resource not found"},
+      "401" => %{"description" => "Request is not authorized"},
       "500" => %{"description" => "Internal Server Error"}
     }
     case verb_string do
-      "get" -> 
+      "get" ->
         response = %{"description" => "Resource Content"}
         if response_schema != nil do
           response = Map.put(response, "schema", response_schema)
@@ -224,7 +231,7 @@ defmodule Mix.Tasks.Swagger do
       "post" -> Map.merge(responses, %{"201" => %{"description" => "Resource created"}, "400" => %{"description" => "Request contains bad values"}})
       "put" -> Map.merge(responses, %{"204" => %{"description" => "No Content"}, "400" => %{"description" => "Request contains bad values"}})
       _ -> responses
-    end    
+    end
   end
 
   @doc """
@@ -251,7 +258,7 @@ defmodule Mix.Tasks.Swagger do
   into a Swagger property type (http://swagger.io/specification/#dataTypeType)
   """
   @spec convert_property_type(term) :: map
-  def convert_property_type(type) do 
+  def convert_property_type(type) do
     case type do
       :id -> %{"type" => "integer", "format" => "int64"}
       :binary_id -> %{"type" => "string", "format" => "binary"}
@@ -260,9 +267,9 @@ defmodule Mix.Tasks.Swagger do
       :boolean -> %{"type" => "boolean"}
       :string -> %{"type" => "string"}
       :binary -> %{"type" => "string", "format" => "binary"}
-      :Ecto.DateTime -> %{"type" => "string", "format" => "date-time"}
-      :Ecto.Date -> %{"type" => "string", "format" => "date"}
-      :Ecto.Time -> %{"type" => "string", "format" => "date-time"}
+      Ecto.DateTime -> %{"type" => "string", "format" => "date-time"}
+      Ecto.Date -> %{"type" => "string", "format" => "date"}
+      Ecto.Time -> %{"type" => "string", "format" => "date-time"}
       :uuid -> %{"type" => "string"}
       _ -> %{"type" => "string"}
     end
