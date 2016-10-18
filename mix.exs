@@ -43,9 +43,9 @@ defmodule SwaggerDoc.Mixfile do
   # Type `mix help deps` for more examples and options
   defp deps do
     [
-      {:phoenix, ">= 1.0.0"},
-      {:ecto, ">= 1.0.0"},
-      {:poison, "~> 1.5.0"},
+      {:phoenix, "~> 1.2"},
+      {:ecto, "~> 2.0"},
+      {:poison, "~> 2.0"},
       {:ex_doc, "~> 0.8.4", only: :docs},
       {:earmark, "~> 0.1.17", only: :docs},
       {:meck, "~> 0.8.3", only: :test},
@@ -64,5 +64,5 @@ defmodule SwaggerDoc.Mixfile do
       files:  ~w(lib) ++
               ~w(LICENSE mix.exs README.md)
     ]
-  end  
+  end
 end

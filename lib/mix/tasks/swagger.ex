@@ -141,25 +141,15 @@ defmodule Mix.Tasks.Swagger do
         parse_default_verb(route.path)
       end
 
-      response_schema = verb[:response_schema]
-      verb = Map.delete(verb, :response_schema)
-
       verb_string = String.downcase("#{route.verb}")
-      if verb[:responses] == nil do
-        verb = Map.put(verb, :responses, default_responses(verb_string, response_schema))
-      end
 
-      if verb[:produces] == nil do
-        verb = Map.put(verb, :produces, Application.get_env(:swaggerdoc, :produces, []))
-      end
-
-      if verb[:operationId] == nil do
-        verb = Map.put(verb, :operationId, "#{route.opts}")
-      end
-
-      if verb[:description] == nil do
-        verb = Map.put(verb, :description, "")
-      end
+      response_schema = verb[:response_schema]
+      verb = verb
+      |> Map.delete(:response_schema)
+      |> Map.put(:responses, verb[:responses] || default_responses(verb_string, response_schema))
+      |> Map.put(:produces, verb[:produces] || Application.get_env(:swaggerdoc, :produces, []))
+      |> Map.put(:operationId, verb[:operationId] || "#{route.opts}")
+      |> Map.put(:description, verb[:description] || "")
 
       path = Map.put(path, verb_string, verb)
       paths = Map.put(swagger[:paths], swagger_path, path)
