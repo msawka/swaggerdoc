@@ -129,10 +129,7 @@ defmodule Mix.Tasks.Swagger do
     else
       swagger_path = path_from_route(String.split(route.path, "/"), nil)
 
-      path = swagger[:paths][swagger_path]
-      if path == nil do
-        path = %{}
-      end
+      path = swagger[:paths][swagger_path] || %{}
 
       func_name = "swaggerdoc_#{route.opts}"
       verb = if route.plug != nil && Keyword.has_key?(route.plug.__info__(:functions), String.to_atom(func_name)) do
@@ -181,18 +178,16 @@ defmodule Mix.Tasks.Swagger do
       if String.first(path_segment) == ":" do
 
         #http://swagger.io/specification/#parameterObject
+        name = String.slice(path_segment, 1..String.length(path_segment))
+        #assumes all params named "id" are integers
+        type = if name == "id", do: "integer", else: "string"
         parameter = %{
-          "name" => String.slice(path_segment, 1..String.length(path_segment)),
+          "name" => name,
           "in" => "path",
           "description" => "",
           "required" => true,
-          "type" => "string"
+          "type" => type
         }
-
-        #assumes all params named "id" are integers
-        if parameter["name"] == "id" do
-          parameter = Map.put(parameter, "type", "integer")
-        end
 
         parameters ++ [parameter]
       else
@@ -213,20 +208,25 @@ defmodule Mix.Tasks.Swagger do
     responses = %{
       "404" => %{"description" => "Resource not found"},
       "401" => %{"description" => "Request is not authorized"},
-      "500" => %{"description" => "Internal Server Error"}
-    }
-    case verb_string do
-      "get" ->
-        response = %{"description" => "Resource Content"}
-        if response_schema != nil do
-          response = Map.put(response, "schema", response_schema)
-        end
-        Map.merge(responses, %{"200" => response})
-      "delete" -> Map.merge(responses, %{"204" => %{"description" => "No Content"}})
-      "post" -> Map.merge(responses, %{"201" => %{"description" => "Resource created"}, "400" => %{"description" => "Request contains bad values"}})
-      "put" -> Map.merge(responses, %{"204" => %{"description" => "No Content"}, "400" => %{"description" => "Request contains bad values"}})
-      _ -> responses
-    end
+      "500" => %{"description" => "Internal Server Error"} }
+    |> Map.merge(
+      case verb_string do
+        "get" ->
+          %{"200" => 
+            %{"description" => "Resource Content"}
+            |> Map.merge(if !is_nil(response_schema), do: %{"schema" => response_schema}, else: %{})}
+        "delete" ->
+          %{"204" => %{"description" => "No Content"}}
+        "post" ->
+          %{"201" => %{"description" => "Resource created"},
+            "400" => %{"description" => "Request contains bad values"}}
+        "put" ->
+          %{"204" => %{"description" => "No Content"},
+            "400" => %{"description" => "Request contains bad values"}}
+        _ ->
+          %{}
+      end
+    )
   end
 
   @doc """
@@ -236,20 +236,25 @@ defmodule Mix.Tasks.Swagger do
   def build_definitions([], def_json), do: def_json
   def build_definitions([code_def | remaining_defs], def_json) do
     module = elem(code_def, 0)
-    if :erlang.function_exported(module, :__schema__, 1) do
+    def_json = if :erlang.function_exported(module, :__schema__, 1) do
       properties_json = Enum.reduce module.__schema__(:types), %{}, fn(type, properties_json) ->
         Map.put(properties_json, "#{elem(type, 0)}", convert_property_type(elem(type, 1)))
       end
 
       module_json = %{"properties" => properties_json}
+      |> Map.merge(
+        if :erlang.function_exported(module, :changeset, 2) do
+          module_struct = module.changeset(module.__struct__, %{})
+          required = required_fields module_struct.errors
+          %{"required" => required}
+        else
+          %{}
+        end
+      )
 
-      if :erlang.function_exported(module, :changeset, 2) do
-        module_struct = module.changeset(module.__struct__, %{})
-        required = required_fields module_struct.errors
-        module_json = Map.put(module_json, "required", required)
-      end
-
-      def_json = Map.put(def_json, "#{inspect module}", module_json)
+      Map.put(def_json, "#{inspect module}", module_json)
+    else
+      def_json
     end
 
     build_definitions(remaining_defs, def_json)
