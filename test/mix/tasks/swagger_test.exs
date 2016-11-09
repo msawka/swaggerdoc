@@ -7,7 +7,7 @@ defmodule Mocks.DefaultPlug do
 end
 
 defmodule Mocks.UserModel do
-  use Ecto.Model
+  use Ecto.Schema
 
   schema "users" do
     field :name, :string
@@ -16,11 +16,12 @@ defmodule Mocks.UserModel do
     field :number_of_pets, :integer
 
     timestamps
-  end  
+  end
 end
 
 defmodule Mocks.UserRequiredModel do
-  use Ecto.Model
+  use Ecto.Schema
+  import Ecto.Changeset
 
   schema "users" do
     field :name, :string
@@ -29,14 +30,15 @@ defmodule Mocks.UserRequiredModel do
     field :number_of_pets, :integer
 
     timestamps
-  end  
+  end
 
-  @required_fields ~w(name email)
-  @optional_fields ~w(bio number_of_pets)
+  @required_fields ~w(name email)a
+  @optional_fields ~w(bio number_of_pets)a
 
-  def changeset(model, params \\ :empty) do
-    model
-    |> cast(params, @required_fields, @optional_fields)
+  def changeset(struct, params \\ %{}) do
+    struct
+    |> cast(params, @required_fields ++ @optional_fields)
+    |> validate_required(@required_fields)
   end
 
 end
@@ -67,7 +69,7 @@ defmodule Mix.Tasks.Swagger.Tests do
     Application.delete_env(:swaggerdoc, :base_path)
     Application.delete_env(:swaggerdoc, :schemes)
     Application.delete_env(:swaggerdoc, :consumes)
-    Application.delete_env(:swaggerdoc, :produces)    
+    Application.delete_env(:swaggerdoc, :produces)
     Application.delete_env(:swaggerdoc, :pipe_through)
   end
 
@@ -79,9 +81,9 @@ defmodule Mix.Tasks.Swagger.Tests do
   setup_all do
     on_exit fn ->
       reset_swagger_env
-    end    
+    end
     :ok
-  end  
+  end
 
   #==============================
   # app_json tests
@@ -166,7 +168,7 @@ defmodule Mix.Tasks.Swagger.Tests do
 
   test "add_routes - empty routes" do
     assert Swagger.add_routes([], %{}) == %{}
-  end  
+  end
 
   test "add_routes - route" do
     route = %PhoenixRoute{
@@ -175,11 +177,11 @@ defmodule Mix.Tasks.Swagger.Tests do
       verb: "GET"
     }
     assert Swagger.add_routes([route], %{paths: %{}}) == %{
-      paths: %{"/test" => 
+      paths: %{"/test" =>
         %{"get" =>  %{
-          description: "", 
-          operationId: "index", 
-          parameters: [], 
+          description: "",
+          operationId: "index",
+          parameters: [],
           produces: [],
           responses: %{
             "200" => %{"description" => "Resource Content"},
@@ -188,7 +190,7 @@ defmodule Mix.Tasks.Swagger.Tests do
           }
         }}
       }}
-  end 
+  end
 
   test "add_routes - route with default template param" do
     route = %PhoenixRoute{
@@ -197,10 +199,10 @@ defmodule Mix.Tasks.Swagger.Tests do
       verb: "GET"
     }
     assert Swagger.add_routes([route], %{paths: %{}}) == %{
-      paths: %{"/testing/{id}" => 
+      paths: %{"/testing/{id}" =>
         %{"get" =>  %{
-          description: "", 
-          operationId: "index", 
+          description: "",
+          operationId: "index",
           parameters: [%{"description" => "", "in" => "path", "name" => "id", "required" => true, "type" => "integer"}],
           produces: [],
           responses: %{
@@ -210,7 +212,7 @@ defmodule Mix.Tasks.Swagger.Tests do
           }
         }}
       }}
-  end 
+  end
 
   test "add_routes - route with select pipe_through" do
     Application.put_env(:swaggerdoc, :pipe_through, [:api])
@@ -225,10 +227,10 @@ defmodule Mix.Tasks.Swagger.Tests do
       pipe_through: [:api],
     }]
     assert Swagger.add_routes(route, %{paths: %{}}) == %{
-      paths: %{"/api/v1/testing/{id}" => 
+      paths: %{"/api/v1/testing/{id}" =>
         %{"get" =>  %{
-          description: "", 
-          operationId: "index", 
+          description: "",
+          operationId: "index",
           parameters: [%{"description" => "", "in" => "path", "name" => "id", "required" => true, "type" => "integer"}],
           produces: [],
           responses: %{
@@ -239,7 +241,7 @@ defmodule Mix.Tasks.Swagger.Tests do
         }}
       }}
     Application.delete_env(:swaggerdoc, :pipe_through)
-  end 
+  end
 
   test "add_routes - route from custom plug" do
     route = %PhoenixRoute{
@@ -249,15 +251,15 @@ defmodule Mix.Tasks.Swagger.Tests do
       plug: Mocks.DefaultPlug
     }
     assert Swagger.add_routes([route], %{paths: %{}}) == %{
-      paths: %{"/test" => 
+      paths: %{"/test" =>
         %{"get" =>  %{
-          description: "", 
-          operationId: "index", 
+          description: "",
+          operationId: "index",
           produces: [],
           responses: %{}
         }}
       }}
-  end 
+  end
 
   #==============================
   # path_from_route tests
@@ -279,11 +281,11 @@ defmodule Mix.Tasks.Swagger.Tests do
 
   test "parse_default_verb - no templates" do
     assert Swagger.parse_default_verb("/testing") == %{parameters: []}
-  end  
+  end
 
   test "parse_default_verb - id segment" do
     assert Swagger.parse_default_verb("/testing/:id") == %{parameters: [%{"description" => "", "in" => "path", "name" => "id", "required" => true, "type" => "integer"}]}
-  end  
+  end
 
   test "parse_default_verb - name segment" do
     assert Swagger.parse_default_verb("/testing/:name") == %{parameters: [%{"description" => "", "in" => "path", "name" => "name", "required" => true, "type" => "string"}]}
@@ -294,69 +296,69 @@ defmodule Mix.Tasks.Swagger.Tests do
 
   test "default_responses - unknown verb" do
     assert Swagger.default_responses("junk") == %{
-      "404" => %{"description" => "Resource not found"}, 
-      "401" => %{"description" => "Request is not authorized"}, 
+      "404" => %{"description" => "Resource not found"},
+      "401" => %{"description" => "Request is not authorized"},
       "500" => %{"description" => "Internal Server Error"}
     }
   end
 
   test "default_responses - get without schema" do
     assert Swagger.default_responses("get") == %{
-      "404" => %{"description" => "Resource not found"}, 
-      "401" => %{"description" => "Request is not authorized"}, 
+      "404" => %{"description" => "Resource not found"},
+      "401" => %{"description" => "Request is not authorized"},
       "500" => %{"description" => "Internal Server Error"},
       "200" => %{"description" => "Resource Content"}
     }
-  end   
+  end
 
   test "default_responses - get with schema" do
     assert Swagger.default_responses("get", %{}) == %{
-      "404" => %{"description" => "Resource not found"}, 
-      "401" => %{"description" => "Request is not authorized"}, 
+      "404" => %{"description" => "Resource not found"},
+      "401" => %{"description" => "Request is not authorized"},
       "500" => %{"description" => "Internal Server Error"},
       "200" => %{"description" => "Resource Content", "schema" => %{}}
     }
-  end    
+  end
 
   test "default_responses - delete" do
     assert Swagger.default_responses("delete") == %{
-      "404" => %{"description" => "Resource not found"}, 
-      "401" => %{"description" => "Request is not authorized"}, 
+      "404" => %{"description" => "Resource not found"},
+      "401" => %{"description" => "Request is not authorized"},
       "500" => %{"description" => "Internal Server Error"},
       "204" => %{"description" => "No Content"}
     }
-  end   
+  end
 
   test "default_responses - post" do
     assert Swagger.default_responses("post") == %{
-      "404" => %{"description" => "Resource not found"}, 
-      "401" => %{"description" => "Request is not authorized"}, 
+      "404" => %{"description" => "Resource not found"},
+      "401" => %{"description" => "Request is not authorized"},
       "500" => %{"description" => "Internal Server Error"},
-      "201" => %{"description" => "Resource created"}, 
+      "201" => %{"description" => "Resource created"},
       "400" => %{"description" => "Request contains bad values"}
     }
-  end    
+  end
 
   test "default_responses - put" do
     assert Swagger.default_responses("put") == %{
-      "404" => %{"description" => "Resource not found"}, 
-      "401" => %{"description" => "Request is not authorized"}, 
+      "404" => %{"description" => "Resource not found"},
+      "401" => %{"description" => "Request is not authorized"},
       "500" => %{"description" => "Internal Server Error"},
       "204" => %{"description" => "No Content"},
       "400" => %{"description" => "Request contains bad values"}
     }
-  end  
+  end
 
   #==============================
   # build_definitions tests
 
   test "build_definitions - no models" do
     assert Swagger.build_definitions([], %{}) == %{}
-  end  
+  end
 
   test "build_definitions - modules but no models" do
     assert Swagger.build_definitions([{Mocks.DefaultPlug, ""}], %{}) == %{}
-  end 
+  end
 
   #==============================
   # required_fields tests
@@ -373,25 +375,25 @@ defmodule Mix.Tasks.Swagger.Tests do
     assert Swagger.build_definitions([{Mocks.UserModel, ""}], %{}) == %{
       "Mocks.UserModel" => %{
         "properties" => %{
-          "bio" => %{"type" => "string"}, 
+          "bio" => %{"type" => "string"},
           "email" => %{"type" => "string"},
           "id" => %{"format" => "int64", "type" => "integer"},
-          "inserted_at" => %{"format" => "date-time", "type" => "string"}, 
+          "inserted_at" => %{"format" => "date-time", "type" => "string"},
           "name" => %{"type" => "string"},
           "number_of_pets" => %{"format" => "int64", "type" => "integer"},
           "updated_at" => %{"format" => "date-time", "type" => "string"}}
         }
     }
-  end 
+  end
 
   test "build_definitions - model support changeset (required_fields)" do
     assert Swagger.build_definitions([{Mocks.UserRequiredModel, ""}], %{}) == %{
       "Mocks.UserRequiredModel" => %{
         "properties" => %{
-          "bio" => %{"type" => "string"}, 
+          "bio" => %{"type" => "string"},
           "email" => %{"type" => "string"},
           "id" => %{"format" => "int64", "type" => "integer"},
-          "inserted_at" => %{"format" => "date-time", "type" => "string"}, 
+          "inserted_at" => %{"format" => "date-time", "type" => "string"},
           "name" => %{"type" => "string"},
           "number_of_pets" => %{"format" => "int64", "type" => "integer"},
           "updated_at" => %{"format" => "date-time", "type" => "string"}
@@ -399,54 +401,54 @@ defmodule Mix.Tasks.Swagger.Tests do
         "required" => ["name", "email"]
       }
     }
-  end    
+  end
 
   #==============================
   # convert_property_type tests
 
   test "convert_property_type - :id" do
     assert Swagger.convert_property_type(:id) == %{"type" => "integer", "format" => "int64"}
-  end    
+  end
 
   test "convert_property_type - :binary_id" do
     assert Swagger.convert_property_type(:binary_id) == %{"type" => "string", "format" => "binary"}
-  end    
+  end
 
   test "convert_property_type - :integer" do
     assert Swagger.convert_property_type(:integer) == %{"type" => "integer", "format" => "int64"}
-  end      
+  end
 
   test "convert_property_type - :float" do
     assert Swagger.convert_property_type(:float) == %{"type" => "number", "format" => "float"}
-  end      
+  end
 
   test "convert_property_type - :boolean" do
     assert Swagger.convert_property_type(:boolean) == %{"type" => "boolean"}
-  end      
+  end
 
   test "convert_property_type - :string" do
     assert Swagger.convert_property_type(:string) == %{"type" => "string"}
-  end      
+  end
 
   test "convert_property_type - :Ecto.DateTime " do
     assert Swagger.convert_property_type(Ecto.DateTime ) == %{"type" => "string", "format" => "date-time"}
-  end      
+  end
 
   test "convert_property_type - :Ecto.Date" do
     assert Swagger.convert_property_type(Ecto.Date) ==%{"type" => "string", "format" => "date"}
-  end    
+  end
 
   test "convert_property_type - :Ecto.Time" do
     assert Swagger.convert_property_type(Ecto.Time) == %{"type" => "string", "format" => "date-time"}
-  end   
+  end
 
   test "convert_property_type - :uuid" do
     assert Swagger.convert_property_type(:uuid) == %{"type" => "string"}
-  end   
+  end
 
   test "convert_property_type - :unknown" do
     assert Swagger.convert_property_type(:unknown) == %{"type" => "string"}
-  end    
+  end
 
   #==============================
   # run tests
@@ -459,7 +461,7 @@ defmodule Mix.Tasks.Swagger.Tests do
     assert Swagger.run(nil) == :ok
   after
     :meck.unload
-  end                       
+  end
 
   test "run raise exception" do
     :meck.new(Swagger, [:passthrough])
@@ -469,5 +471,5 @@ defmodule Mix.Tasks.Swagger.Tests do
     assert Swagger.run(nil) == :ok
   after
     :meck.unload
-  end     
+  end
 end
