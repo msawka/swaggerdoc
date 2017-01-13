@@ -205,7 +205,7 @@ defmodule Mix.Tasks.Swagger do
   """
   @spec default_responses(String.t, any) :: map
   def default_responses(verb_string, response_schema \\ nil) do
-    responses = %{
+    %{
       "404" => %{"description" => "Resource not found"},
       "401" => %{"description" => "Request is not authorized"},
       "500" => %{"description" => "Internal Server Error"} }
