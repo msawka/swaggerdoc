@@ -15,7 +15,7 @@ defmodule Mocks.UserModel do
     field :bio, :string
     field :number_of_pets, :integer
 
-    timestamps
+    timestamps()
   end
 end
 
@@ -29,7 +29,7 @@ defmodule Mocks.UserRequiredModel do
     field :bio, :string
     field :number_of_pets, :integer
 
-    timestamps
+    timestamps()
   end
 
   @required_fields ~w(name email)a
@@ -74,13 +74,13 @@ defmodule Mix.Tasks.Swagger.Tests do
   end
 
   setup do
-    reset_swagger_env
+    reset_swagger_env()
     :ok
   end
 
   setup_all do
     on_exit fn ->
-      reset_swagger_env
+      reset_swagger_env()
     end
     :ok
   end
