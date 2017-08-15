@@ -174,6 +174,9 @@ The conversion uses schema fields and updates them into schemas unde the [Defini
 * :boolean -> %{"type" => "boolean"}
 * :string -> %{"type" => "string"}
 * :binary -> %{"type" => "string", "format" => "binary"}
+* :naive_datetime -> %{"type" => "string", "format" => "date-time"}
+* :date -> %{"type" => "string", "format" => "date"}
+* :time -> %{"type" => "string", "format" => "date-time"}
 * :Ecto.DateTime -> %{"type" => "string", "format" => "date-time"}
 * :Ecto.Date -> %{"type" => "string", "format" => "date"}
 * :Ecto.Time -> %{"type" => "string", "format" => "date-time"}
