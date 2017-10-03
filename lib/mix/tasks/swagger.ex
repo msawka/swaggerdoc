@@ -110,9 +110,13 @@ defmodule Mix.Tasks.Swagger do
   @spec get_router([any]) :: term
   def get_router(args) do
     cond do
-      args != nil && length(args) > 0 -> Module.concat("Elixir", Enum.at(args, 0))
-      Mix.Project.umbrella? -> Mix.raise "Umbrella applications require an explicit router to be given to Phoenix.routes"
-      true -> Module.concat(Mix.Phoenix.base(), "Router")
+      args != nil && length(args) > 0 ->
+        Module.concat("Elixir", Enum.at(args, 0))
+      Mix.Project.umbrella? ->
+        Mix.raise "Umbrella applications require an explicit router to be given to Phoenix.routes"
+      true ->
+        Keyword.get(Mix.Phoenix.inflect(""), :web_module)
+        |> Module.concat("Router")
     end
   end
 
@@ -274,6 +278,9 @@ defmodule Mix.Tasks.Swagger do
       :boolean -> %{"type" => "boolean"}
       :string -> %{"type" => "string"}
       :binary -> %{"type" => "string", "format" => "binary"}
+      :naive_datetime -> %{"type" => "string", "format" => "date-time"}
+      :date -> %{"type" => "string", "format" => "date"}
+      :time -> %{"type" => "string", "format" => "date-time"}
       Ecto.DateTime -> %{"type" => "string", "format" => "date-time"}
       Ecto.Date -> %{"type" => "string", "format" => "date"}
       Ecto.Time -> %{"type" => "string", "format" => "date-time"}
