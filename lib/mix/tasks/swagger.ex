@@ -110,9 +110,13 @@ defmodule Mix.Tasks.Swagger do
   @spec get_router([any]) :: term
   def get_router(args) do
     cond do
-      args != nil && length(args) > 0 -> Module.concat("Elixir", Enum.at(args, 0))
-      Mix.Project.umbrella? -> Mix.raise "Umbrella applications require an explicit router to be given to Phoenix.routes"
-      true -> Module.concat(Mix.Phoenix.base(), "Web.Router")
+      args != nil && length(args) > 0 ->
+        Module.concat("Elixir", Enum.at(args, 0))
+      Mix.Project.umbrella? ->
+        Mix.raise "Umbrella applications require an explicit router to be given to Phoenix.routes"
+      true ->
+        Keyword.get(Mix.Phoenix.inflect(""), :web_module)
+        |> Module.concat("Router")
     end
   end
 

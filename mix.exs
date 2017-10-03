@@ -7,7 +7,7 @@ defmodule SwaggerDoc.Mixfile do
     [
       app: :swaggerdoc,
       version: @version,
-      elixir: "~> 1.0",
+      elixir: "~> 1.4",
       build_embedded: Mix.env == :prod,
       start_permanent: Mix.env == :prod,
       deps: deps(),
@@ -43,12 +43,12 @@ defmodule SwaggerDoc.Mixfile do
   # Type `mix help deps` for more examples and options
   defp deps do
     [
-      {:phoenix, "~> 1.2"},
-      {:ecto, "~> 2.0"},
+      {:phoenix, "~> 1.3"},
+      {:ecto, "~> 2.1"},
       {:poison, "~> 2.0"},
       {:ex_doc, "~> 0.8.4", only: :docs},
       {:earmark, "~> 0.1.17", only: :docs},
-      {:meck, "~> 0.8.3", only: :test},
+      {:meck, "~> 0.8.4", only: :test},
     ]
   end
 

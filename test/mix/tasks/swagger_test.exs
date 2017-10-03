@@ -152,11 +152,11 @@ defmodule Mix.Tasks.Swagger.Tests do
   # get_router tests
 
   test "get_router - nil args" do
-    assert Swagger.get_router(nil) == Swaggerdoc.Router
+    assert Swagger.get_router(nil) == SwaggerdocWeb.Router
   end
 
   test "get_router - empty args" do
-    assert Swagger.get_router([]) == Swaggerdoc.Router
+    assert Swagger.get_router([]) == SwaggerdocWeb.Router
   end
 
   #==============================
